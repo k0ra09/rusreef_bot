@@ -149,10 +149,10 @@
         tg.expand(); 
 
         // === НАСТРОЙКИ API ===
-        // Твоя ссылка на Ngrok (туннель к серверу)
+        // Твоя ссылка на Ngrok. Я убрал лишние пробелы.
         const API_URL = "https://8e90-194-238-57-55.ngrok-free.app"; 
         
-        // Получаем ID пользователя (или используем тестовый, если открыто в браузере)
+        // Получаем ID пользователя
         const USER_ID = tg.initDataUnsafe?.user?.id || 123456789;
 
         // Настройка кнопки "Сохранить"
@@ -165,16 +165,17 @@
             historyContainer.innerHTML = '<h1>📊 История</h1><p style="text-align:center">Загрузка...</p>';
             
             try {
-                // Запрос к твоему серверу через Ngrok
-                let response = await fetch(`${API_URL}/get_history?user_id=${USER_ID}`);
+                // ИСПРАВЛЕНО: Используем сложение строк вместо кавычек, чтобы избежать ошибок
+                let url = API_URL + "/get_history?user_id=" + USER_ID;
+                
+                let response = await fetch(url);
                 
                 if (!response.ok) {
-                    throw new Error("Ошибка сети");
+                    throw new Error("Ошибка сети: " + response.status);
                 }
 
-                let data = await response.json(); // Превращаем ответ в JSON
+                let data = await response.json(); 
                 
-                // Очищаем экран
                 historyContainer.innerHTML = '<h1>📊 История</h1>';
 
                 if (data.length === 0) {
@@ -182,7 +183,6 @@
                     return;
                 }
 
-                // Рисуем карточки
                 data.forEach(item => {
                     let card = document.createElement('div');
                     card.className = 'history-card';
@@ -206,23 +206,19 @@
 
         // === ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК ===
         function switchTab(tabName) {
-            // Убираем active у всех
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
-            // Добавляем active нужному экрану
             document.getElementById('screen-' + tabName).classList.add('active');
             
-            // Подсветка кнопки внизу
             const btnIndex = tabName === 'add' ? 0 : 1;
             document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
 
-            // Управление Главной Кнопкой и загрузка данных
             if (tabName === 'add') {
                 tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
-                loadHistory(); // <-- ЗАГРУЖАЕМ ИСТОРИЮ ПРИ ОТКРЫТИИ ВКЛАДКИ
+                loadHistory(); 
             }
         }
 
