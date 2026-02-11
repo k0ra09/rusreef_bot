@@ -1,232 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RusReef App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 70px;
-        }
-
-        .screen {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.3s;
-        }
-        
-        .screen.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        h1 { font-size: 22px; margin-bottom: 20px; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; color: var(--tg-theme-hint-color, #888); }
-        input {
-            width: 100%;
-            padding: 12px;
-            box-sizing: border-box;
-            border: 1px solid var(--tg-theme-hint-color, #ccc);
-            border-radius: 12px;
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #000);
-            font-size: 16px;
-            outline: none;
-        }
-        input:focus { border-color: var(--tg-theme-button-color, #2481cc); }
-
-        .history-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f9f9f9);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .history-date { font-size: 12px; color: var(--tg-theme-hint-color, #888); margin-bottom: 4px; }
-        .history-values { font-weight: bold; font-size: 15px; }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-right: 5px;
-            background: rgba(0,0,0,0.05);
-        }
-
-        .tabbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--tg-theme-hint-color, #888);
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            width: 50%;
-        }
-
-        .tab-btn.active { color: var(--tg-theme-button-color, #2481cc); }
-        .icon { font-size: 20px; margin-bottom: 2px; }
-    </style>
 </head>
 <body>
 
-    <div id="screen-add" class="screen active">
-        <h1>📝 Новый замер</h1>
-        
-        <div class="form-group">
-            <label>🧂 Соленость (ppt)</label>
-            <input type="number" id="salinity" placeholder="35" step="0.1">
-        </div>
+<h2>Новый замер</h2>
 
-        <div class="form-group">
-            <label>🧪 pH</label>
-            <input type="number" id="ph" placeholder="8.0" step="0.1">
-        </div>
+<input type="number" id="salinity" placeholder="Соленость">
+<input type="number" id="ph" placeholder="pH">
+<input type="number" id="kh" placeholder="kH">
 
-        <div class="form-group">
-            <label>💎 kH (Alkalinity)</label>
-            <input type="number" id="kh" placeholder="7.5" step="0.1">
-        </div>
-    </div>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <div id="screen-history" class="screen">
-        <h1>📊 История</h1>
-        <p style="text-align:center; color:#888;">Загрузка...</p>
-    </div>
+    tg.MainButton.text = "СОХРАНИТЬ";
+    tg.MainButton.show();
 
-    <div class="tabbar">
-        <button class="tab-btn active" onclick="switchTab('add')">
-            <span class="icon">➕</span>Замер
-        </button>
-        <button class="tab-btn" onclick="switchTab('history')">
-            <span class="icon">📜</span>История
-        </button>
-    </div>
+    tg.onEvent("mainButtonClicked", function() {
+        const data = {
+            salinity: document.getElementById("salinity").value,
+            ph: document.getElementById("ph").value,
+            kh: document.getElementById("kh").value
+        };
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand(); 
+        tg.sendData(JSON.stringify(data));
+    });
+</script>
 
-        // === НАСТРОЙКИ (Я вписал твою ссылку жестко, чтобы избежать ошибок) ===
-        // Базовая ссылка без лишних символов
-        const NGROK_HOST = "https://8e90-194-238-57-55.ngrok-free.app";
-        
-        const USER_ID = tg.initDataUnsafe?.user?.id || 123456789;
-
-        tg.MainButton.text = "СОХРАНИТЬ";
-        tg.MainButton.show();
-
-        async function loadHistory() {
-            const historyContainer = document.getElementById('screen-history');
-            historyContainer.innerHTML = '<h1>📊 История</h1><p style="text-align:center">Загрузка...</p>';
-            
-            try {
-                // === МАГИЯ ЗДЕСЬ ===
-                // Мы используем специальный конструктор URL. 
-                // Он сам добавит слэши где надо и уберет мусор.
-                const urlObj = new URL("/get_history", NGROK_HOST);
-                urlObj.searchParams.append("user_id", USER_ID);
-                
-                // Превращаем объект обратно в строку для fetch
-                const finalUrl = urlObj.toString();
-                
-                // Для отладки (если вдруг снова ошибка)
-                console.log("Запрос к:", finalUrl);
-
-                let response = await fetch(finalUrl);
-                
-                if (!response.ok) {
-                    throw new Error("Ошибка сервера: " + response.status);
-                }
-
-                let data = await response.json(); 
-                
-                historyContainer.innerHTML = '<h1>📊 История</h1>';
-
-                if (data.length === 0) {
-                    historyContainer.innerHTML += '<p style="text-align:center; color:#888">Записей пока нет</p>';
-                    return;
-                }
-
-                data.forEach(item => {
-                    let card = document.createElement('div');
-                    card.className = 'history-card';
-                    card.innerHTML = `
-                        <div>
-                            <div class="history-date">${item.date}</div>
-                            <div class="history-values">
-                                <span class="badge">S: ${item.salinity}</span>
-                                <span class="badge">pH: ${item.ph}</span>
-                                <span class="badge">kH: ${item.kh}</span>
-                            </div>
-                        </div>
-                    `;
-                    historyContainer.appendChild(card);
-                });
-
-            } catch (error) {
-                historyContainer.innerHTML = `<h1>📊 История</h1><p style="color:red; text-align:center">Ошибка:<br>${error.message}</p>`;
-                // Показываем ссылку, если снова будет сбой
-                historyContainer.innerHTML += `<p style="font-size:10px; color:#ccc; word-break:break-all;">Target: ${NGROK_HOST}</p>`;
-            }
-        }
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            document.getElementById('screen-' + tabName).classList.add('active');
-            
-            const btnIndex = tabName === 'add' ? 0 : 1;
-            document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
-
-            if (tabName === 'add') {
-                tg.MainButton.show();
-            } else {
-                tg.MainButton.hide();
-                loadHistory(); 
-            }
-        }
-
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
-            let data = {
-                salinity: document.getElementById("salinity").value,
-                ph: document.getElementById("ph").value,
-                kh: document.getElementById("kh").value
-            };
-            if (data.salinity === "" && data.ph === "" && data.kh === "") {
-                tg.showPopup({message: 'Заполни хотя бы одно поле!'});
-                return;
-            }
-            tg.sendData(JSON.stringify(data)); 
-        });
-    </script>
 </body>
-</html></html>
+</html>
