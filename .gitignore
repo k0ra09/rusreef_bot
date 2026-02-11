@@ -1,0 +1,12 @@
+# База данных
+aquarium.db
+
+# Python кэш
+__pycache__/
+*.pyc
+
+# Виртуальное окружение
+venv/
+
+# macOS мусор
+.DS_Store

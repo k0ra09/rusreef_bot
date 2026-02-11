@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import WebAppInfo
 
-TOKEN = "8595417826:AAH4bCiGjFZrt1pZ8Kdrw57C4G5Gd1Vy9hE"
+TOKEN = os.getenv("BOT_TOKEN")
 WEBAPP_URL = "https://k0ra09.github.io/rusreef_bot/webapp/index.html"
 
 bot = Bot(token=TOKEN)
