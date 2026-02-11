@@ -134,9 +134,9 @@
         let tg = window.Telegram.WebApp;
         tg.expand(); 
 
-        // === ВАЖНОЕ ИСПРАВЛЕНИЕ ===
-        // .trim() удалит все случайные пробелы и Enter в начале и конце
-        const API_URL = "https://8e90-194-238-57-55.ngrok-free.app".trim(); 
+        // === НАСТРОЙКИ (Я вписал твою ссылку жестко, чтобы избежать ошибок) ===
+        // Базовая ссылка без лишних символов
+        const NGROK_HOST = "https://8e90-194-238-57-55.ngrok-free.app";
         
         const USER_ID = tg.initDataUnsafe?.user?.id || 123456789;
 
@@ -148,16 +148,22 @@
             historyContainer.innerHTML = '<h1>📊 История</h1><p style="text-align:center">Загрузка...</p>';
             
             try {
-                // Собираем ссылку аккуратно
-                const finalUrl = API_URL + "/get_history?user_id=" + USER_ID;
+                // === МАГИЯ ЗДЕСЬ ===
+                // Мы используем специальный конструктор URL. 
+                // Он сам добавит слэши где надо и уберет мусор.
+                const urlObj = new URL("/get_history", NGROK_HOST);
+                urlObj.searchParams.append("user_id", USER_ID);
                 
-                // Проверка для отладки (если не сработает, бот покажет, какую ссылку он видит)
-                console.log("Fetching URL:", finalUrl);
+                // Превращаем объект обратно в строку для fetch
+                const finalUrl = urlObj.toString();
+                
+                // Для отладки (если вдруг снова ошибка)
+                console.log("Запрос к:", finalUrl);
 
                 let response = await fetch(finalUrl);
                 
                 if (!response.ok) {
-                    throw new Error("Сервер ответил ошибкой: " + response.status);
+                    throw new Error("Ошибка сервера: " + response.status);
                 }
 
                 let data = await response.json(); 
@@ -187,8 +193,8 @@
 
             } catch (error) {
                 historyContainer.innerHTML = `<h1>📊 История</h1><p style="color:red; text-align:center">Ошибка:<br>${error.message}</p>`;
-                // Если ошибка осталась, покажем ссылку на экране, чтобы понять причину
-                historyContainer.innerHTML += `<p style="font-size:10px; color:#aaa; word-break:break-all;">${API_URL}</p>`;
+                // Показываем ссылку, если снова будет сбой
+                historyContainer.innerHTML += `<p style="font-size:10px; color:#ccc; word-break:break-all;">Target: ${NGROK_HOST}</p>`;
             }
         }
 
@@ -223,4 +229,4 @@
         });
     </script>
 </body>
-</html>
+</html></html>
