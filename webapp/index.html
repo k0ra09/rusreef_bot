@@ -2,83 +2,210 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RusReef Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RusReef App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* === БАЗОВЫЕ СТИЛИ === */
         body {
-            font-family: sans-serif;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 70px; /* Отступ снизу для меню */
+        }
+
+        /* === ЭКРАНЫ (СТРАНИЦЫ) === */
+        .screen {
+            display: none; /* По умолчанию скрыты */
             padding: 20px;
+            animation: fadeIn 0.3s; /* Анимация появления */
         }
         
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
+        /* Класс active делает экран видимым */
+        .screen.active {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h1 { font-size: 22px; margin-bottom: 20px; }
+
+        /* === ФОРМА ВВОДА === */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; color: var(--tg-theme-hint-color, #888); }
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border: 1px solid var(--tg-theme-hint-color, #ccc);
+            border-radius: 12px;
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
             color: var(--tg-theme-text-color, #000);
-            font-size: 16px; /* Чтобы на айфоне не приближало при вводе */
+            font-size: 16px;
+            outline: none;
         }
+        input:focus { border-color: var(--tg-theme-button-color, #2481cc); }
+
+        /* === ТАБЛИЦА ИСТОРИИ === */
+        .history-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f9f9f9);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-date { font-size: 12px; color: var(--tg-theme-hint-color, #888); margin-bottom: 4px; }
+        .history-values { font-weight: bold; font-size: 15px; }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-right: 5px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* === НИЖНЕЕ МЕНЮ (ТАББАР) === */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--tg-theme-hint-color, #888);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            width: 50%;
+        }
+
+        .tab-btn.active {
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+        
+        .icon { font-size: 20px; margin-bottom: 2px; }
+
     </style>
 </head>
 <body>
 
-    <h1>📝 Новые замеры</h1>
+    <div id="screen-add" class="screen active">
+        <h1>📝 Новый замер</h1>
+        
+        <div class="form-group">
+            <label>🧂 Соленость (ppt)</label>
+            <input type="number" id="salinity" placeholder="35" step="0.1">
+        </div>
 
-    <div class="form-group">
-        <label>🧂 Соленость (ppt)</label>
-        <input type="number" id="salinity" placeholder="35" step="0.1">
+        <div class="form-group">
+            <label>🧪 pH</label>
+            <input type="number" id="ph" placeholder="8.0" step="0.1">
+        </div>
+
+        <div class="form-group">
+            <label>💎 kH (Alkalinity)</label>
+            <input type="number" id="kh" placeholder="7.5" step="0.1">
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>🧪 pH</label>
-        <input type="number" id="ph" placeholder="8.0" step="0.1">
+    <div id="screen-history" class="screen">
+        <h1>📊 История</h1>
+        <p style="font-size: 12px; color: #888; text-align: center;">Демонстрация интерфейса</p>
+        
+        <div class="history-card">
+            <div>
+                <div class="history-date">Сегодня, 12:00</div>
+                <div class="history-values">
+                    <span class="badge">S: 35</span>
+                    <span class="badge">pH: 8.2</span>
+                    <span class="badge">kH: 7.7</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-card">
+            <div>
+                <div class="history-date">Вчера, 10:30</div>
+                <div class="history-values">
+                    <span class="badge">S: 34.5</span>
+                    <span class="badge">pH: 8.0</span>
+                    <span class="badge">kH: 7.5</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>💎 kH (Alkalinity)</label>
-        <input type="number" id="kh" placeholder="7.5" step="0.1">
+    <div class="tabbar">
+        <button class="tab-btn active" onclick="switchTab('add')">
+            <span class="icon">➕</span>
+            Замер
+        </button>
+        <button class="tab-btn" onclick="switchTab('history')">
+            <span class="icon">📜</span>
+            История
+        </button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // На весь экран
+        tg.expand(); 
 
-        // Настраиваем Главную Кнопку (внизу экрана)
+        // Настройка кнопки "Сохранить" (видна только на вкладке Замер)
         tg.MainButton.text = "СОХРАНИТЬ";
-        tg.MainButton.show(); // Показываем её
+        tg.MainButton.show();
 
-        // Что происходит при нажатии на Главную Кнопку
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
+        // Функция переключения вкладок
+        function switchTab(tabName) {
+            // 1. Убираем класс active со всех кнопок и экранов
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // 2. Добавляем active нужным
+            document.getElementById('screen-' + tabName).classList.add('active');
             
-            // 1. Собираем данные из полей
+            // Подсветка кнопки
+            const btnIndex = tabName === 'add' ? 0 : 1;
+            document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
+
+            // 3. Управляем Главной Кнопкой (показываем только на вкладке "Замер")
+            if (tabName === 'add') {
+                tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        // Логика отправки данных (как и раньше)
+        Telegram.WebApp.onEvent('mainButtonClicked', function(){
             let data = {
                 salinity: document.getElementById("salinity").value,
                 ph: document.getElementById("ph").value,
                 kh: document.getElementById("kh").value
             };
-
-            // 2. Проверяем, что хоть что-то заполнено
             if (data.salinity === "" && data.ph === "" && data.kh === "") {
-                tg.showPopup({message: 'Заполни хотя бы одно поле!'});
+                tg.showPopup({message: 'Заполни поля!'});
                 return;
             }
-
-            // 3. Отправляем данные боту (в виде строки JSON)
             tg.sendData(JSON.stringify(data)); 
         });
     </script>
