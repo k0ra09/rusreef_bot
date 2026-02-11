@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RusReef App</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        /* Простые стили для красоты */
+        body {
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff); /* Цвет фона как в ТГ */
+            color: var(--tg-theme-text-color, #000000); /* Цвет текста как в ТГ */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🐠 RusReef</h1>
+    
+    <div class="card">
+        <p>Привет! Это твой будущий дневник аквариума.</p>
+        <p>Здесь будут графики и тесты.</p>
+    </div>
+
+    <script>
+        // Инициализируем WebApp
+        let tg = window.Telegram.WebApp;
+        
+        // Говорим Телеграму, что приложение готово и его можно развернуть на весь экран
+        tg.expand(); 
+    </script>
+</body>
+</html>
