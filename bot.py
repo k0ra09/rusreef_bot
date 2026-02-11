@@ -9,7 +9,7 @@ from aiogram.types import WebAppInfo
 
 # ================= CONFIG =================
 
-TOKEN = os.getenv("BOT_TOKEN")  # Токен берём из переменной окружения
+TOKEN = os.getenv("BOT_TOKEN")
 WEBAPP_URL = "https://k0ra09.github.io/rusreef_bot/webapp/index.html"
 
 if not TOKEN:
@@ -87,7 +87,7 @@ async def start(message: types.Message):
         resize_keyboard=True
     )
 
-    await message.answer("🌊 RusReef запущен.\nВыбери действие:", reply_markup=keyboard)
+    await message.answer("🌊 RusReef готов к работе.", reply_markup=keyboard)
 
 
 @dp.message(F.web_app_data)
@@ -104,7 +104,6 @@ async def handle_webapp(message: types.Message):
 
     warnings = []
 
-    # Диапазоны для морского аквариума
     if salinity and not (34 <= salinity <= 36):
         warnings.append("⚠️ Соленость вне нормы (34–36 ppt)")
 
@@ -140,9 +139,19 @@ async def history(message: types.Message):
     text = "📊 Последние замеры:\n\n"
 
     for row in rows:
+        date, salinity, ph, kh = row
+
+        def check(value, low, high):
+            if low <= value <= high:
+                return f"🟢 {value}"
+            else:
+                return f"🔴 {value}"
+
         text += (
-            f"📅 {row[0]}\n"
-            f"🧂 {row[1]} | 🧪 {row[2]} | 💎 {row[3]}\n"
+            f"📅 {date}\n"
+            f"🧂 {check(salinity, 34, 36)} | "
+            f"🧪 {check(ph, 7.8, 8.5)} | "
+            f"💎 {check(kh, 6, 12)}\n"
             f"──────────────\n"
         )
 
@@ -152,10 +161,6 @@ async def history(message: types.Message):
 
 async def main():
     init_db()
-    print("База данных готова.")
-    print("Бот запущен.")
-
-    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 
