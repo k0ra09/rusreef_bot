@@ -3,50 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RusReef App</title>
-    
+    <title>RusReef Log</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
-        /* Простые стили для красоты */
         body {
             font-family: sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff); /* Цвет фона как в ТГ */
-            color: var(--tg-theme-text-color, #000000); /* Цвет текста как в ТГ */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
             padding: 20px;
         }
         
-        h1 {
-            margin-bottom: 20px;
+        .form-group {
+            margin-bottom: 15px;
         }
 
-        .card {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 15px;
-            border-radius: 10px;
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
             width: 100%;
-            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 16px; /* Чтобы на айфоне не приближало при вводе */
         }
     </style>
 </head>
 <body>
 
-    <h1>🐠 RusReef</h1>
-    
-    <div class="card">
-        <p>Привет! Это твой будущий дневник аквариума.</p>
-        <p>Здесь будут графики и тесты.</p>
+    <h1>📝 Новые замеры</h1>
+
+    <div class="form-group">
+        <label>🧂 Соленость (ppt)</label>
+        <input type="number" id="salinity" placeholder="35" step="0.1">
+    </div>
+
+    <div class="form-group">
+        <label>🧪 pH</label>
+        <input type="number" id="ph" placeholder="8.0" step="0.1">
+    </div>
+
+    <div class="form-group">
+        <label>💎 kH (Alkalinity)</label>
+        <input type="number" id="kh" placeholder="7.5" step="0.1">
     </div>
 
     <script>
-        // Инициализируем WebApp
         let tg = window.Telegram.WebApp;
-        
-        // Говорим Телеграму, что приложение готово и его можно развернуть на весь экран
-        tg.expand(); 
+        tg.expand(); // На весь экран
+
+        // Настраиваем Главную Кнопку (внизу экрана)
+        tg.MainButton.text = "СОХРАНИТЬ";
+        tg.MainButton.show(); // Показываем её
+
+        // Что происходит при нажатии на Главную Кнопку
+        Telegram.WebApp.onEvent('mainButtonClicked', function(){
+            
+            // 1. Собираем данные из полей
+            let data = {
+                salinity: document.getElementById("salinity").value,
+                ph: document.getElementById("ph").value,
+                kh: document.getElementById("kh").value
+            };
+
+            // 2. Проверяем, что хоть что-то заполнено
+            if (data.salinity === "" && data.ph === "" && data.kh === "") {
+                tg.showPopup({message: 'Заполни хотя бы одно поле!'});
+                return;
+            }
+
+            // 3. Отправляем данные боту (в виде строки JSON)
+            tg.sendData(JSON.stringify(data)); 
+        });
     </script>
 </body>
 </html>
